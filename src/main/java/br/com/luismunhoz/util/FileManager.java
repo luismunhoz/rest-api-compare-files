@@ -6,9 +6,9 @@ import br.com.luismunhoz.exception.FileException;
 
 public interface FileManager {
 	
-	BufferedInputStream loadFile(String path);
+	byte[] loadFile(String path);
 	
-	void saveFile(String path, byte[] data, String extension) throws FileException;
+	void saveFile(String path, byte[] data) throws FileException;
 	
 	Boolean haveFile(String path) throws FileException;
 

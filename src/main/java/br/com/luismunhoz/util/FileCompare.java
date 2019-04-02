@@ -5,6 +5,6 @@ import br.com.luismunhoz.model.FileDifference;
 
 public interface FileCompare {
 	
-	public FileDifference Compare(long id) throws FileException;
+	public FileDifference compare(String id) throws FileException;
 
 }
