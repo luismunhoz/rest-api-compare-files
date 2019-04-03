@@ -16,7 +16,7 @@ public class TextFileDifference extends FileDifference {
 
 	@Override
 	public String toString() {
-		return "TextFileDifference [size=" + super.getSize() + "lines=" + lines + "]";
+		return "TextFileDifference [status=" + super.getStatus() + "lines=" + lines + "]";
 	}
 
 }

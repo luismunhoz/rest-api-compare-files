@@ -4,19 +4,19 @@ import java.util.List;
 
 public class FileDifference {
 	
-	private String size;
+	private String status;
 
-	public String getSize() {
-		return size;
+	public String getStatus() {
+		return status;
 	}
 
-	public void setSize(String size) {
-		this.size = size;
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 	@Override
 	public String toString() {
-		return "FileDifference [size=" + size + "]";
+		return "FileDifference [status=" + status + "]";
 	}
 
 }

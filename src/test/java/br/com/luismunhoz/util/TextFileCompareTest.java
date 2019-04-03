@@ -1,21 +1,80 @@
 package br.com.luismunhoz.util;
 
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
+import java.io.InputStream;
+
+import org.junit.Before;
 import org.junit.Test;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.test.context.TestPropertySource;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
+import br.com.luismunhoz.CompareFilesApplication;
+import br.com.luismunhoz.model.FileDifference;
+import br.com.luismunhoz.model.FileSide;
 import br.com.luismunhoz.model.TextFileDifference;
 
-@PropertySource("classpath:application.properties")
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes={CompareFilesApplication.class})
 public class TextFileCompareTest {
-
-	@Test
-	public void test() {
-		TextFileCompare target = new TextFileCompare();
-		target.compare("1234");
+	
+	@Autowired
+	DiskFileManager diskFileManager;
+	
+	@Autowired
+	TextFileCompare target;
 		
+	@Test
+	public void testWithEqualFiles() {
+		InputStream inputStream = DiskFileManagerTest.class
+		          .getResourceAsStream("/shakespeare.txt");
+		diskFileManager.saveFile("test_id", FileSide.LEFT, inputStream);
+		
+		inputStream = DiskFileManagerTest.class
+		          .getResourceAsStream("/shakespeare.txt");
+		diskFileManager.saveFile("test_id", FileSide.RIGHT, inputStream);
+		
+		FileDifference fileDifferences = target.compare("test_id");
+		assertThat(fileDifferences.getStatus(),is("Files are equal."));		
 	}
+	
+	@Test
+	public void testWithLeftFileBigger() {
+		InputStream inputStream = DiskFileManagerTest.class
+		          .getResourceAsStream("/shakespeareBigger.txt");
+		diskFileManager.saveFile("test_id", FileSide.LEFT, inputStream);
+		
+		inputStream = DiskFileManagerTest.class
+		          .getResourceAsStream("/shakespeare.txt");
+		diskFileManager.saveFile("test_id", FileSide.RIGHT, inputStream);
+		
+		FileDifference fileDifferences = target.compare("test_id");
+		
+		assertThat(fileDifferences.getStatus(),is("Files are different."));		
+		assertThat(((TextFileDifference)fileDifferences).getLines().size(), is(3));
+		assertThat(((TextFileDifference)fileDifferences).getLines().get(0).getLeftLine(), is("more lines - one"));		
+	}
+	
+	@Test
+	public void testWithRightFileBigger() {
+		InputStream inputStream = DiskFileManagerTest.class
+		          .getResourceAsStream("/shakespeare.txt");
+		diskFileManager.saveFile("test_id", FileSide.LEFT, inputStream);
+		
+		inputStream = DiskFileManagerTest.class
+		          .getResourceAsStream("/shakespeareBigger.txt");
+		diskFileManager.saveFile("test_id", FileSide.RIGHT, inputStream);
+		
+		FileDifference fileDifferences = target.compare("test_id");
+
+		assertThat(fileDifferences.getStatus(),is("Files are different."));		
+		assertThat(((TextFileDifference)fileDifferences).getLines().size(), is(3));
+		assertThat(((TextFileDifference)fileDifferences).getLines().get(0).getRightLine(), is("more lines - one"));
+	}
+	
+	
 
 }

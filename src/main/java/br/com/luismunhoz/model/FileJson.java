@@ -1,7 +1,10 @@
 package br.com.luismunhoz.model;
 
-public class File {
+import javax.validation.constraints.Size;
+
+public class FileJson {
 	
+	@Size(max=1048576)
 	private String fileContent;
 
 	public String getFileContent() {

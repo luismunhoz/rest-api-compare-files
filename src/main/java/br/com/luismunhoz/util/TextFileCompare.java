@@ -1,26 +1,31 @@
 package br.com.luismunhoz.util;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import br.com.luismunhoz.exception.FileException;
 import br.com.luismunhoz.model.FileDifference;
+import br.com.luismunhoz.model.FilesToCompare;
 import br.com.luismunhoz.model.LineDifference;
 import br.com.luismunhoz.model.TextFileDifference;
 
+@Component
 public class TextFileCompare implements FileCompare {
 
 	@Value("${application.fileLocation}")
 	String fileLocation;
+
+	@Autowired
+	FileManager fileManager;
 
 	private static final Log logger = LogFactory.getLog(BinaryFileCompare.class);
 
@@ -29,36 +34,49 @@ public class TextFileCompare implements FileCompare {
 		long start = System.nanoTime();
 		TextFileDifference fileDiffs = new TextFileDifference();
 		List<LineDifference> diffs = new ArrayList<LineDifference>();
-		String fileLeftPath = fileLocation + System.getProperty("file.separator") + "left_" + id;
-		String fileRightPath = fileLocation + System.getProperty("file.separator") + "right_" + id;
+
+		FilesToCompare files = fileManager.loadFile(id);
+		InputStream isLeft = files.getLeftFile();
+		InputStream isRight = files.getRightFile();
 		
-		File left = new File(fileLeftPath);
-		File right = new File(fileRightPath);
+		try {
+			BufferedReader brLeft = new BufferedReader(new InputStreamReader(isLeft, "UTF-8"));		
+			BufferedReader brRight = new BufferedReader(new InputStreamReader(isRight, "UTF-8"));
 
-		try (BufferedReader brLeft = new BufferedReader(new FileReader(left));
-			 BufferedReader brRight = new BufferedReader(new FileReader(right))) {
 
-			String lineLeft = null;
-			String lineRight = null;
+			String lineLeft = brLeft.readLine();
+			String lineRight = brRight.readLine();
 			int line = 0;
-			while((lineLeft = brLeft.readLine()) != null || (lineRight = brRight.readLine()) != null) {
-				if(!lineLeft.equals(lineRight)) {
-					System.out.println("Line:"+line);
-					System.out.println("Left:"+lineLeft);
-					System.out.println("Right:"+lineRight);
+			while (lineLeft != null || lineRight!= null) {
+								
+				if (lineLeft!=null && !lineLeft.equals(lineRight)) {
+					LineDifference lineDiff = new LineDifference();
+					lineDiff.setNumber(line);
+					lineDiff.setLeftLine(lineLeft!=null?lineLeft:"");
+					lineDiff.setRightLine(lineRight!=null?lineRight:"");
+					diffs.add(lineDiff);
+				}
+				if (lineLeft==null && lineRight!=null) {
+					LineDifference lineDiff = new LineDifference();
+					lineDiff.setNumber(line);
+					lineDiff.setLeftLine(lineLeft!=null?lineLeft:"");
+					lineDiff.setRightLine(lineRight!=null?lineRight:"");
+					diffs.add(lineDiff);
 				}
 				line++;
+				lineLeft = brLeft.readLine();
+				lineRight = brRight.readLine();
+				
 			}
-						
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			if(diffs.size()>0) {
+				fileDiffs.setLines(diffs);
+				fileDiffs.setStatus("Files are different.");
+			}else {
+				fileDiffs.setStatus("Files are equal.");
+			}
+		} catch (Exception e) {
+			throw new FileException("", e);
 		}
-		
-		
 
 		long end = System.nanoTime();
 		logger.info("Execution time: " + (end - start) / 1000000 + "ms");

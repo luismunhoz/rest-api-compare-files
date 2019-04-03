@@ -1,82 +1,108 @@
 package br.com.luismunhoz.util;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedInputStream;
-import java.io.File;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Base64;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Value;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringRunner;
 
+import br.com.luismunhoz.CompareFilesApplication;
 import br.com.luismunhoz.exception.FileException;
+import br.com.luismunhoz.model.FileSide;
+import br.com.luismunhoz.model.FilesToCompare;
 
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes={CompareFilesApplication.class})
 public class DiskFileManagerTest {
 	
-	private String inputFileName = "image-test-1.jpg";	
-	private String outputFileName = "image-test-2.jpg";
-
-	@Value("${application.fileLocation}")
-	String fileLocation;	
-	
+	@Autowired
+	DiskFileManager target;
+			
 	@Test
-	public void saveFileTest() {
-		try {
-			ClassLoader classLoader = getClass().getClassLoader();
-	        File inputFile = new File(classLoader
-	        		.getResource(inputFileName)
-	        		.getFile());
-			byte[] fileContent = FileUtils.readFileToByteArray(inputFile);
-			String outputFilePath = inputFile.getParentFile().getAbsolutePath() + System.getProperty("file.separator") + outputFileName;
-			DiskFileManager target = new DiskFileManager();
-			target.saveFile(outputFilePath, fileContent);
-	        File outputFile = new File(classLoader
-	                .getResource(outputFileName)
-	                .getFile());
-	        assertTrue(FileUtils.contentEquals(inputFile, outputFile));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	public void saveFileTest() throws Exception {
+		
+		InputStream inputStream = getClass().getClassLoader().getResourceAsStream("shakespeare.txt");
+		
+		target.saveFile("test_id", FileSide.LEFT, inputStream);
+		
+		assertTrue(target.haveFile("test_id", FileSide.LEFT));
+		
+		inputStream.close();
 	}
 	
 	@Test
-	public void loadFileTest() {
-		ClassLoader classLoader = getClass().getClassLoader();
-		String inputFilePath = classLoader
-				.getResource(inputFileName)
-				.getFile();					
-		DiskFileManager target = new DiskFileManager();
-		byte[] load = target.loadFile(inputFilePath);
-		File inputFile = new File(classLoader
-				.getResource(inputFileName)
-				.getFile());
-		assertEquals(load.length, inputFile.length());
+	public void loadFileTest() throws Exception {
+		
+		InputStream inputStream = DiskFileManagerTest.class
+		          .getResourceAsStream("/shakespeare.txt");
+		target.saveFile("test_id", FileSide.LEFT, inputStream);
+		inputStream.close();
+		
+		inputStream = DiskFileManagerTest.class
+		          .getResourceAsStream("/shakespeare.txt");
+		target.saveFile("test_id", FileSide.RIGHT, inputStream);
+		inputStream.close();
+		
+		FilesToCompare files = target.loadFile("test_id");
+		
+		assertTrue(DiskFileManagerTest.contentEquals(files.getLeftFile(), files.getRightFile()));
+		
 	}
 	
 	@Test(expected = FileException.class)
 	public void loadFileTestException() {
-		ClassLoader classLoader = getClass().getClassLoader();
-		DiskFileManager target = new DiskFileManager();
-		byte[] load = target.loadFile("nonono");
-		File inputFile = new File(classLoader
-				.getResource(inputFileName)
-				.getFile());
-		assertEquals(load.length, inputFile.length());
+
+		FilesToCompare files = target.loadFile("test_nonono");
+
 	}
 
 	@Test
 	public void haveFileTest() {
 		
-		System.out.println(fileLocation);
-		
-		ClassLoader classLoader = getClass().getClassLoader();		
-		String inputFilePath = classLoader
-				.getResource(inputFileName)
-				.getFile();			
-		DiskFileManager target = new DiskFileManager();				
-		assertTrue(target.haveFile(inputFilePath));
+		InputStream inputStream = DiskFileManagerTest.class
+		          .getResourceAsStream("/shakespeare.txt");	
+
+		target.saveFile("test_id", FileSide.LEFT, inputStream);
+		assertTrue(target.haveFile("test_id",FileSide.LEFT));
 	}
+	
+	 public static boolean contentEquals(InputStream input1, InputStream input2) throws IOException
+	  {
+	    if (!(input1 instanceof BufferedInputStream))
+	    {
+	      input1 = new BufferedInputStream(input1);
+	    }
+	    if (!(input2 instanceof BufferedInputStream))
+	    {
+	      input2 = new BufferedInputStream(input2);
+	    }
+
+	    int ch = input1.read();
+	    while (-1 != ch)
+	    {
+	      int ch2 = input2.read();
+	      if (ch != ch2)
+	      {
+	        return false;
+	      }
+	      ch = input1.read();
+	    }
+
+	    int ch2 = input2.read();
+	    return (ch2 == -1);
+	  }	
 
 }

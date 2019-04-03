@@ -16,7 +16,7 @@ public class BinaryFileDifference extends FileDifference {
 
 	@Override
 	public String toString() {
- 		return "BinaryFileDifference [size=" + super.getSize() + "diffs=" + diffs + "]";
+ 		return "BinaryFileDifference [status=" + super.getStatus() + "diffs=" + diffs + "]";
 	}
 
 }
