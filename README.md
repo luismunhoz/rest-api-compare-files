@@ -29,13 +29,21 @@ General-purpose
 
 The application can be configured in relation to the points:
   - File Type Detection (detectFileType)
+  
   		Besides the requested binary comparison, I also created the possibility of comparing texts.
+		
 		To use text comparison, it is necessary to detect the type of file that was loaded.
+		
 		With detectFileType = true, if the two files (left and right) are of type text, the
+		
 		program will perform a line-to-line comparison.
+		
   - Search for different bytes, even when the files are of different sizes (shouldFindDifferencesToDifferentSizes):
+  
 		It allows, in the case of binary files, even with different sizes to be swept both files 
+		
 		and returned the differences found (offset + length)
+		
 
 
 #### Authenticate Requests
