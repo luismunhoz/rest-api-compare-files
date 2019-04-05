@@ -7,6 +7,8 @@ import java.util.Base64;
 
 import org.apache.commons.codec.binary.StringUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,7 @@ import br.com.luismunhoz.exception.UploadFileException;
 import br.com.luismunhoz.model.FileDifference;
 import br.com.luismunhoz.model.FileSide;
 import br.com.luismunhoz.model.FileType;
+import br.com.luismunhoz.util.BinaryFileCompare;
 import br.com.luismunhoz.util.DetectFileType;
 import br.com.luismunhoz.util.FileCompare;
 import br.com.luismunhoz.util.FileCompareFactory;
@@ -41,7 +44,10 @@ public class FileCompareService {
 	@Autowired
 	FileCompareFactory fileCompareFactory;
 	
+	private static final Log logger = LogFactory.getLog(BinaryFileCompare.class);		
+	
 	public Boolean uploadLeftFile(String id, InputStream fileContent) throws Exception {
+		logger.debug("uploadLeftFile. id:"+id);
 		InputStream decodedFileContent = Base64.getMimeDecoder().wrap(fileContent);
 		Boolean firstTime = !fileManager.haveFile(id, FileSide.LEFT);
 		fileManager.saveFile(id, FileSide.LEFT, decodedFileContent);
@@ -49,6 +55,7 @@ public class FileCompareService {
 	}
 	
 	public Boolean uploadRightFile(String id, InputStream fileContent) {
+		logger.debug("uploadRightFile. id:"+id);
 		InputStream decodedFileContent = Base64.getMimeDecoder().wrap(fileContent);
 		Boolean firstTime = !fileManager.haveFile(id, FileSide.RIGHT);
 		fileManager.saveFile(id, FileSide.RIGHT, decodedFileContent);
@@ -56,6 +63,7 @@ public class FileCompareService {
 	}
 	
 	public FileDifference compareFiles(String id) {
+		logger.debug("compareFiles. id:"+id);
 		checkFiles(id);
 		FileType type = detectFileType(id);
 		FileCompare fileCompare = fileCompareFactory.createFileCompare(type);

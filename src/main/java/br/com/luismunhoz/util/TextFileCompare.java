@@ -79,7 +79,7 @@ public class TextFileCompare extends FileCompare {
 		}
 
 		long end = System.nanoTime();
-		logger.info("Execution time: " + (end - start) / 1000000 + "ms");
+		logger.info("TextFileCompare - Execution time: " + (end - start) / 1000000 + "ms");
 
 		return fileDiffs;
 

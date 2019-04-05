@@ -6,6 +6,8 @@ import java.io.InputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -22,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import br.com.luismunhoz.model.FileDifference;
 import br.com.luismunhoz.model.FileJson;
 import br.com.luismunhoz.service.FileCompareService;
+import br.com.luismunhoz.util.BinaryFileCompare;
 import io.swagger.annotations.ApiOperation;
 
 /*
@@ -47,10 +50,13 @@ public class FileCompareController {
 	
 	@Value("${message.fileUpdated}")
 	String fileUpdated;
+	
+	private static final Log logger = LogFactory.getLog(BinaryFileCompare.class);			
 
 	@RequestMapping(value = "/{id}/left", method = RequestMethod.POST, produces = "application/json")
 	@ApiOperation(value="Upload the left file to make a comparison.", nickname="Upload Left File")
 	public ResponseEntity<?> saveLeftFile(@PathVariable(value="id", required=true) String id,  @RequestBody FileJson data) throws Exception {
+		logger.debug("FileCompareController - saveLeftFile. Id:"+id);
 		Boolean firstUpload = fileCompareService.uploadLeftFile(id, IOUtils.toInputStream(data.getFileContent()));
 		if(firstUpload) {
 			return ResponseEntity.noContent().build();			
@@ -62,6 +68,7 @@ public class FileCompareController {
 	@RequestMapping(value = "/{id}/right", method = RequestMethod.POST, produces = "application/json")
 	@ApiOperation(value="Upload the right file to make a comparison.", nickname="Upload Right File")
 	public ResponseEntity<?> saveRightFile(@PathVariable(value="id", required=true) String id, @RequestBody FileJson data) throws Exception {
+		logger.debug("FileCompareController - saveRightFile. Id:"+id);
 		Boolean firstUpload = fileCompareService.uploadRightFile(id, IOUtils.toInputStream(data.getFileContent()));
 		if(firstUpload) {
 			return ResponseEntity.noContent().build();			
@@ -73,6 +80,7 @@ public class FileCompareController {
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = "application/json")
 	@ApiOperation(value="Compare the left and right files.", nickname="Compare Files")
 	private ResponseEntity<FileDifference> compareFiles(@PathVariable(value="id", required=true) String id) throws Exception {
+		logger.debug("FileCompareController - compareFiles. Id:"+id);
 		FileDifference response = fileCompareService.compareFiles(id);
 		return new ResponseEntity<>(response, HttpStatus.OK);
 		
@@ -81,6 +89,7 @@ public class FileCompareController {
 	@RequestMapping(value = "/bigfile/{id}/left", method = RequestMethod.POST)
 	@ApiOperation(value="Large Files - Upload the left file to make a comparison.", nickname="Large Files - Upload Left File")
     private ResponseEntity<?> createLeft(@RequestParam("file") MultipartFile multipartFile, @PathVariable(value="id", required=true) String id) throws IOException{
+		logger.debug("FileCompareController - createLeft. Id:"+id);
 		Boolean firstUpload = true;
         InputStream fileStream = multipartFile.getInputStream();
 		try {
@@ -98,6 +107,7 @@ public class FileCompareController {
 	@RequestMapping(value = "/bigfile/{id}/right", method = RequestMethod.POST)
 	@ApiOperation(value="Large Files - Upload the right file to make a comparison.", nickname="Large Files - Upload Right File")
     private ResponseEntity<?> createRight(@RequestParam("file") MultipartFile multipartFile, @PathVariable(value="id", required=true) String id) throws IOException{
+		logger.debug("FileCompareController - createRight. Id:"+id);
 		Boolean firstUpload=true;
         InputStream fileStream = multipartFile.getInputStream();
 		try {
