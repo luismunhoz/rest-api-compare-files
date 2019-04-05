@@ -4,19 +4,19 @@ import java.util.List;
 
 public class BinaryFileDifference extends FileDifference {
 
-	private List<Integer> diffs;
+	private List<DiffOffSet> diffs;
 
-	public List<Integer> getDiffs() {
+	public List<DiffOffSet> getDiffs() {
 		return diffs;
 	}
 
-	public void setDiffs(List<Integer> diffs) {
+	public void setDiffs(List<DiffOffSet> diffs) {
 		this.diffs = diffs;
 	}
 
 	@Override
 	public String toString() {
- 		return "BinaryFileDifference [status=" + super.getStatus() + "diffs=" + diffs + "]";
+		return "BinaryFileDifference [status=" + super.getStatus() + "diffs=" + diffs + "]";
 	}
 
 }

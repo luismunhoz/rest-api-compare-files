@@ -6,6 +6,7 @@ import static org.junit.Assert.assertThat;
 import java.io.InputStream;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,7 @@ public class BinaryFileCompareTest {
 		          .getResourceAsStream("/texto1.txt");
 		diskFileManager.saveFile("test_id", FileSide.LEFT, inputStream);
 		inputStream = DiskFileManagerTest.class
-		          .getResourceAsStream("/texto2.txt");
+		          .getResourceAsStream("/image-test-1.jpg");
 		diskFileManager.saveFile("test_id", FileSide.RIGHT, inputStream);
 		FileDifference response = target.compare("test_id");	
 		assertThat(response.getStatus(), is("Files have different length"));
@@ -67,5 +68,4 @@ public class BinaryFileCompareTest {
 		
 	}
 	
-
 }

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import br.com.luismunhoz.exception.FileException;
 import br.com.luismunhoz.model.BinaryFileDifference;
+import br.com.luismunhoz.model.DiffOffSet;
 import br.com.luismunhoz.model.FileDifference;
 import br.com.luismunhoz.model.FilesToCompare;
 
@@ -22,6 +23,18 @@ import br.com.luismunhoz.model.FilesToCompare;
 public class BinaryFileCompare extends FileCompare {	
 	@Value("${application.fileLocation}")
 	String fileLocation;
+	
+	@Value("${application.shouldFindDifferencesToDifferentSizes}")
+	Boolean shouldFindDifferences;
+	
+	@Value("${message.resultFilesHaveDifferentLength}")
+	String resultFilesHaveDifferentLength;
+	
+	@Value("${message.resultFilesAreEqual}")
+	String resultFilesAreEqual;
+	
+	@Value("${message.resultFilesHaveSameLength}")
+	String resultFilesHaveSameLength;
 	
 	@Autowired
 	FileManager fileManager;
@@ -32,7 +45,7 @@ public class BinaryFileCompare extends FileCompare {
 	public FileDifference compare(String id) throws FileException {
         long start = System.nanoTime();
         BinaryFileDifference fileDiffs = new BinaryFileDifference();
-        List<Integer> diffs = new ArrayList<Integer>();
+        List<DiffOffSet> diffs = new ArrayList<DiffOffSet>();
 		try {
 			
 			FilesToCompare files = fileManager.loadFile(id);
@@ -47,30 +60,58 @@ public class BinaryFileCompare extends FileCompare {
 		    {
 		    	fis2 = new BufferedInputStream(fis2);
 		    }
-			
+		    DiffOffSet diff = null;
+			int offset = -1;
+			int lastB1 =-1, lastB2 = -1;
 	        int b1 = 0, b2 = 0, pos = 1;
-	        while (b1 != -1 && b2 != -1) {
+	        while (b1 != -1 || b2 != -1) {
 	            if (b1 != b2) {
-	            	diffs.add(pos);
+	            	if(offset==-1) {
+		            	diff = new DiffOffSet();
+		            	offset = pos;
+		            	diff.setOffset(offset);	            		
+	            	}
+	            }else {
+	            	if(offset>-1) {
+	            		diff.setLength(pos-offset);
+	            		diffs.add(diff);
+	            		offset = -1;
+	            	}
 	            }
 	            pos++;
 	            b1 = fis1.read();
 	            b2 = fis2.read();
+	            if(b1==-1 && lastB1==-1) {
+	            	lastB1 = pos-1;
+	            }
+	            if(b2==-1 && lastB2==-1) {
+	            	lastB2 = pos-1;
+	            }
+	            if((b1==-1 || b2==-1) && !shouldFindDifferences) {
+	            	break;
+	            }
 	        }
-	        fileDiffs.setDiffs(diffs);
-	        if (b1 != b2) {
-	        	fileDiffs.setStatus("Files have different length");
+        	if(offset>-1) {
+        		diff.setLength(pos-offset);
+        		diffs.add(diff);
+        		offset = -1;
+        	}
+        	if(shouldFindDifferences) {
+    	        fileDiffs.setDiffs(diffs);        		
+        	}
+	        if (lastB1 != lastB2) {
+	        	fileDiffs.setStatus(resultFilesHaveDifferentLength);
 	        } else {
 	        	if(diffs.size()<=0) {
-		        	fileDiffs.setStatus("Files are equal");	        		
+		        	fileDiffs.setStatus(resultFilesAreEqual);	        		
 	        	}else {
-		        	fileDiffs.setStatus("Files have same length");	        		
+		        	fileDiffs.setStatus(resultFilesHaveSameLength);	        		
 	        	}
 	        }
 	        fis1.close();
 	        fis2.close();
 	        long end = System.nanoTime();
-	        logger.info("Execution time: " + (end - start)/1000000 + "ms");
+	        logger.info("BinaryFileCompare - Execution time: " + (end - start)/1000000 + "ms");
 		} catch (IOException e) {
 			throw new FileException("Erro", e);
 		}
