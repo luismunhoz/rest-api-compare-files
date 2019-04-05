@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import br.com.luismunhoz.CompareFilesApplication;
+import br.com.luismunhoz.model.BinaryFileDifference;
 import br.com.luismunhoz.model.FileDifference;
 import br.com.luismunhoz.model.FileSide;
 
@@ -26,22 +27,45 @@ public class BinaryFileCompareTest {
 	@Autowired
 	BinaryFileCompare target;
 	
-	@Before
-	public void setup() {
-		
+	@Test
+	public void testFilesAreEqual() {
 		InputStream inputStream = DiskFileManagerTest.class
 		          .getResourceAsStream("/shakespeare.txt");
 		diskFileManager.saveFile("test_id", FileSide.LEFT, inputStream);
-		
 		inputStream = DiskFileManagerTest.class
 		          .getResourceAsStream("/shakespeare.txt");
 		diskFileManager.saveFile("test_id", FileSide.RIGHT, inputStream);
-	}
-
-	@Test
-	public void test() {
 		FileDifference response = target.compare("test_id");	
 		assertThat(response.getStatus(), is("Files are equal"));
 	}
+	
+	@Test
+	public void testFilesAreDifferents() {
+		InputStream inputStream = DiskFileManagerTest.class
+		          .getResourceAsStream("/texto1.txt");
+		diskFileManager.saveFile("test_id", FileSide.LEFT, inputStream);
+		inputStream = DiskFileManagerTest.class
+		          .getResourceAsStream("/texto2.txt");
+		diskFileManager.saveFile("test_id", FileSide.RIGHT, inputStream);
+		FileDifference response = target.compare("test_id");	
+		assertThat(response.getStatus(), is("Files have different length"));
+		System.out.println(((BinaryFileDifference)response).getDiffs());
+		System.out.println(response.toString());
+		System.out.println(((BinaryFileDifference)response).toString());
+	}
+	
+	@Test
+	public void testFilesHaveSameLength() {
+		InputStream inputStream = DiskFileManagerTest.class
+		          .getResourceAsStream("/texto3.txt");
+		diskFileManager.saveFile("test_id", FileSide.LEFT, inputStream);
+		inputStream = DiskFileManagerTest.class
+		          .getResourceAsStream("/texto4.txt");
+		diskFileManager.saveFile("test_id", FileSide.RIGHT, inputStream);
+		FileDifference response = target.compare("test_id");	
+		assertThat(response.getStatus(), is("Files have same length"));
+		
+	}
+	
 
 }

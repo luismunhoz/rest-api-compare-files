@@ -5,67 +5,49 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Base64;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
+import br.com.luismunhoz.CompareFilesApplication;
+import br.com.luismunhoz.model.FileSide;
+import br.com.luismunhoz.model.FilesToCompare;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes={CompareFilesApplication.class})
 public class DetectFileTypeTest {
 	
-	private String inputFilePathText = "texto1.txt";	
-	private String inputFilePathImage = "image-test-1.jpg";
-
+	@Autowired
+	JMimeMagicDetectFileType target;
+	
+	@Autowired
+	DiskFileManager diskFileManager;
+	
 	@Test
-	public void testFileTypeIsText() {
+	public void testFileTypeIsText() throws Exception {
 		
-		ClassLoader classLoader = getClass().getClassLoader();
-        File inputFile = new File(classLoader
-          .getResource(inputFilePathText)
-          .getFile());
- 
-        byte[] fileContent = null;
-		try {
-			fileContent = FileUtils.readFileToByteArray(inputFile);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-        String encodedString = Base64
-          .getEncoder()
-          .encodeToString(fileContent);
-        
-        byte[] decodedBytes = Base64
-                .getDecoder()
-                .decode(encodedString);        
-		
-		JMimeMagicDetectFileType target = new JMimeMagicDetectFileType();
-		Boolean isText = target.isTextFile(decodedBytes);
+		InputStream fileContent = getClass().getClassLoader().getResourceAsStream("shakespeare.txt");
+		        
+		target = new JMimeMagicDetectFileType();
+		Boolean isText = target.isTextFile(fileContent);
 		
 		assertThat(isText, is(true));
 	}
 	
 	@Test
 	public void testFileTypeIsBinary() {
-		ClassLoader classLoader = getClass().getClassLoader();
-        File inputFile = new File(classLoader
-          .getResource(inputFilePathImage)
-          .getFile());
- 
-        byte[] fileContent = null;
-		try {
-			fileContent = FileUtils.readFileToByteArray(inputFile);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-        String encodedString = Base64
-          .getEncoder()
-          .encodeToString(fileContent);
-        
-        byte[] decodedBytes = Base64
-                .getDecoder()
-                .decode(encodedString);        
+		
+		InputStream fileContent = getClass().getClassLoader().getResourceAsStream("image-test-1.jpg");
 		
 		JMimeMagicDetectFileType target = new JMimeMagicDetectFileType();
-		Boolean isText = target.isTextFile(decodedBytes);
+		Boolean isText = target.isTextFile(fileContent);
 		
 		assertThat(isText, is(false));
 		

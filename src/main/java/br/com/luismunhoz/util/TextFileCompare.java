@@ -19,7 +19,7 @@ import br.com.luismunhoz.model.LineDifference;
 import br.com.luismunhoz.model.TextFileDifference;
 
 @Component
-public class TextFileCompare implements FileCompare {
+public class TextFileCompare extends FileCompare {
 
 	@Value("${application.fileLocation}")
 	String fileLocation;

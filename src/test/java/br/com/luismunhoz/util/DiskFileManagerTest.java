@@ -59,6 +59,7 @@ public class DiskFileManagerTest {
 		FilesToCompare files = target.loadFile("test_id");
 		
 		assertTrue(DiskFileManagerTest.contentEquals(files.getLeftFile(), files.getRightFile()));
+		System.out.println(files.toString());
 		
 	}
 	

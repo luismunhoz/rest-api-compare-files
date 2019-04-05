@@ -56,6 +56,9 @@ public class TextFileCompareTest {
 		assertThat(fileDifferences.getStatus(),is("Files are different."));		
 		assertThat(((TextFileDifference)fileDifferences).getLines().size(), is(3));
 		assertThat(((TextFileDifference)fileDifferences).getLines().get(0).getLeftLine(), is("more lines - one"));		
+		System.out.println(fileDifferences.toString());
+		System.out.println(((TextFileDifference)fileDifferences).toString());
+		System.out.println(((TextFileDifference)fileDifferences).getLines().get(0).toString());
 	}
 	
 	@Test

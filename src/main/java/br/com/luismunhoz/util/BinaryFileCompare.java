@@ -19,8 +19,7 @@ import br.com.luismunhoz.model.FileDifference;
 import br.com.luismunhoz.model.FilesToCompare;
 
 @Component
-public class BinaryFileCompare implements FileCompare {
-	
+public class BinaryFileCompare extends FileCompare {	
 	@Value("${application.fileLocation}")
 	String fileLocation;
 	
