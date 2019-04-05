@@ -28,7 +28,8 @@ General-purpose
 #### Configure Strategy
 
 The application can be configured in relation to the points:
-  - File Type Detection (detectFileType)
+
+	  - File Type Detection (detectFileType)
   
   		Besides the requested binary comparison, I also created the possibility of comparing texts.
 		
@@ -38,7 +39,7 @@ The application can be configured in relation to the points:
 		
 		program will perform a line-to-line comparison.
 		
-  - Search for different bytes, even when the files are of different sizes (shouldFindDifferencesToDifferentSizes):
+  	- Search for different bytes, even when the files are of different sizes (shouldFindDifferencesToDifferentSizes):
   
 		It allows, in the case of binary files, even with different sizes to be swept both files 
 		
