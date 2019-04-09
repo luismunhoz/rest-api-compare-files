@@ -1,15 +1,10 @@
 package br.com.luismunhoz.util;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.Base64;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +12,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import br.com.luismunhoz.CompareFilesApplication;
-import br.com.luismunhoz.model.FileSide;
-import br.com.luismunhoz.model.FilesToCompare;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes={CompareFilesApplication.class})

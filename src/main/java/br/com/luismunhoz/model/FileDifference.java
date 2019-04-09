@@ -1,7 +1,5 @@
 package br.com.luismunhoz.model;
 
-import java.util.List;
-
 public class FileDifference {
 	
 	private String status;

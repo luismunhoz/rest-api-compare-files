@@ -41,6 +41,7 @@ public class DiskFileManager implements FileManager {
 		} catch (IOException e) {
 			throw new FileException(messageErrorLoadFile, e);		
 		}
+		logger.debug("FilesToCompare - File loaded.");
 		return response;
 	}
 
@@ -53,7 +54,7 @@ public class DiskFileManager implements FileManager {
 		} catch (IOException e) {
 			throw new FileException(messageErrorSaveFile, e);
 		}
-
+		logger.debug("FilesToCompare - File saved.");
 	}
 
 	@Override

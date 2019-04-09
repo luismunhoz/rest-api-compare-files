@@ -1,18 +1,15 @@
 package br.com.luismunhoz.controller;
 
-import java.io.File;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.ResponseEntity.HeadersBuilder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -57,7 +54,8 @@ public class FileCompareController {
 	@ApiOperation(value="Upload the left file to make a comparison.", nickname="Upload Left File")
 	public ResponseEntity<?> saveLeftFile(@PathVariable(value="id", required=true) String id,  @RequestBody FileJson data) throws Exception {
 		logger.debug("FileCompareController - saveLeftFile. Id:"+id);
-		Boolean firstUpload = fileCompareService.uploadLeftFile(id, IOUtils.toInputStream(data.getFileContent()));
+		
+		Boolean firstUpload = fileCompareService.uploadLeftFile(id, new ByteArrayInputStream(data.getFileContent().getBytes()));
 		if(firstUpload) {
 			return ResponseEntity.noContent().build();			
 		}else {
@@ -69,7 +67,7 @@ public class FileCompareController {
 	@ApiOperation(value="Upload the right file to make a comparison.", nickname="Upload Right File")
 	public ResponseEntity<?> saveRightFile(@PathVariable(value="id", required=true) String id, @RequestBody FileJson data) throws Exception {
 		logger.debug("FileCompareController - saveRightFile. Id:"+id);
-		Boolean firstUpload = fileCompareService.uploadRightFile(id, IOUtils.toInputStream(data.getFileContent()));
+		Boolean firstUpload = fileCompareService.uploadRightFile(id, new ByteArrayInputStream(data.getFileContent().getBytes()));
 		if(firstUpload) {
 			return ResponseEntity.noContent().build();			
 		}else {
