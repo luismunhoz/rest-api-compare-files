@@ -1,4 +1,4 @@
-# WAES Assignment - Compare Files
+# Assignment - Compare Files
 
 General-purpose
 
